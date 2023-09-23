@@ -1,0 +1,20 @@
+{
+    "TransactionIdentifier": "5ee7d7c1-af78-4d7e-9386-abb280822b71",
+    "TotalAmount": 10,
+    "TaxAmount": 1.00,
+    "ThreeDSecure": true,
+    "CurrencyCode": "840",
+    "Source": {
+        "CardPan": "5115010000000001",
+        "CardCvv": "123",
+        "CardExpiration": "2512",
+        "CardholderName": "John Doe"
+    },
+    "OrderIdentifier": "INT-95e75078-7d58-40e8-8053-c3d488f05f59-Orc 3569",
+    "ExtendedData": {
+        "ThreeDSecure": {
+            "ChallengeWindowSize": "2",
+            "MerchantResponseUrl": "https://powertranz.freddydeveloper.com"
+        }
+    }
+}
