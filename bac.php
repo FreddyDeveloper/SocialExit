@@ -7,6 +7,9 @@ PowerTranz Gateway Api 1.3 ---> https://staging.ptranz.com/api/swagger/index.htm
 Testear llamadas api ---> https://www.postman.com/dark-space-610460/workspace/fac-payment-gateway/request/14225525-cad29a2c-aaea-4c50-917a-73650b4b5c33
 
 
+// APLICACIÓN ANDROID - JAVA:
+
+GUIA PAGUELO FACIL: https://developers.paguelofacil.com/guias/paguelofacil-app-sdk-javascript
 ACTIVIDAD DEL CARRITO:
 
 package com.vaqueras.delivery.activity;
