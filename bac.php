@@ -1145,9 +1145,11 @@ public class CartActivity extends BaseActivity implements CartAdp.RecyclerTouchL
 
 
 
-          ACTIVIDAD DE PAGUELO FACIL, BASICAMENTE EL BOTÓN DEL CARRITO LLEVA A LA ACTIVIDAD DE PAGUELO FACIL QUE ES ESTA:
+ACTIVIDAD DE PAGUELO FACIL, BASICAMENTE EL BOTÓN DEL CARRITO LLEVA A LA ACTIVIDAD DE PAGUELO FACIL QUE ES ESTA:
 
-          package com.vaqueras.delivery.activity;
+Mediante SDK:
+            
+package com.vaqueras.delivery.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -1232,6 +1234,119 @@ public class PagueloFacilActivity extends AppCompatActivity {
         // Mostrar el diálogo
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    // Método para mostrar un diálogo de pago rechazado
+    private void showPaymentRejectedDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Pago Rechazado");
+        builder.setMessage("Lo sentimos, el pago ha sido rechazado.");
+
+        // Agregar un botón de "Aceptar"
+        builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Acciones a realizar al hacer clic en "Aceptar"
+            }
+        });
+
+        // Mostrar el diálogo
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+}
+
+
+Mediante Enlace:
+
+package com.vaqueras.delivery.activity;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.vaqueras.delivery.R;
+import com.vaqueras.delivery.utiles.Utility;
+
+public class PagueloFacilActivity extends AppCompatActivity {
+
+    private WebView webView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_paguelofacil);
+
+        // Obtén los parámetros necesarios para el enlace de pago personalizado
+        String cclw = "TU_CCLW"; // Reemplaza con tu código web
+        double cmtn = 0.00; // Inicializa el monto en 0.00
+
+        // Verifica si hay extras en el Intent
+        Bundle extras = getIntent().getExtras();
+        if (extras != null && extras.containsKey("TOTAL_AMOUNT")) {
+            cmtn = extras.getDouble("TOTAL_AMOUNT", 0.00); // Obtiene el monto total del extra
+        } else {
+            // No se encontró el monto en los extras, maneja esta situación según tu lógica
+            // Por ejemplo, puedes mostrar un mensaje de error o tomar alguna otra acción
+        }
+
+        String cdsc = "Factura de Hamburguesas Vaqueras";
+        String returnUrl = "68747470733A2F2F74675F2E696F"; // Cambia a tu URL de retorno codificada en hexadecimal
+        String pfCf = "5B7B226964223A227472616D6974654964222C226E616D654F72"; // Cambia a tu JSON codificado en hexadecimal (opcional)
+        String parm1 = "19816201"; // Cambia a tu parámetro personalizado (opcional)
+        int expiresIn = 3600; // Cambia a la cantidad de segundos deseados (opcional)
+
+        // Construye la URL de redirección para el enlace de pago personalizado
+        String pagueloFacilUrl = "https://secure.paguelofacil.com/LinkDeamon.cfm";
+        String postData = "CCLW=" + cclw + "&CMTN=" + cmtn + "&CDSC=" + cdsc
+                + "&RETURN_URL=" + returnUrl + "&PF_CF=" + pfCf
+                + "&PARM_1=" + parm1 + "&EXPIRES_IN=" + expiresIn;
+
+        // Inicializa el WebView
+        webView = findViewById(R.id.webView);
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+
+        // Carga la URL de redirección del enlace de pago personalizado
+        webView.postUrl(pagueloFacilUrl, postData.getBytes());
+
+        // Configura un WebViewClient para manejar las redirecciones internas
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url != null && url.startsWith("https://checkout.paguelofacil.com")) {
+                    // Detecta la URL de redirección del enlace de pago personalizado
+                    handlePaymentResponse(url);
+                    return true;
+                }
+                return super.shouldOverrideUrlLoading(view, url);
+            }
+        });
+    }
+
+    // Método para manejar la respuesta de pago del enlace de pago personalizado
+    private void handlePaymentResponse(String redirectUrl) {
+        // Analiza la respuesta del enlace de pago personalizado y toma acciones apropiadas
+        // Implementa tu lógica para verificar si el pago fue exitoso o rechazado
+        // y muestra un mensaje apropiado al usuario
+        // Debes analizar el contenido de la página web cargada en el WebView o la URL de redirección
+
+        // Ejemplo de verificación de éxito (ajusta esto según la respuesta real)
+        if (redirectUrl.contains("payment_success_id")) {
+            // El pago fue exitoso
+            Utility.tragectionID = "payment_success_id";
+            Utility.paymentsucsses = 1;
+            finish(); // Cierra esta actividad
+        } else {
+            // El pago fue rechazado
+            showPaymentRejectedDialog();
+        }
     }
 
     // Método para mostrar un diálogo de pago rechazado
