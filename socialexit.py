@@ -135,6 +135,27 @@ ICON_PX  = 20   # icon size in pixels
 # ═══════════════════════════════════════════════════════════════════
 #  WIDGETS
 # ═══════════════════════════════════════════════════════════════════
+class SmoothScrollArea(QScrollArea):
+    """QScrollArea that intercepts wheel events from child widgets
+    so scrolling always works, even when hovering over buttons."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWidgetResizable(True)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+
+    def eventFilter(self, obj, event):
+        if event.type() == event.Type.Wheel:
+            # Redirect wheel events from children to the scroll bar
+            self.verticalScrollBar().setValue(
+                self.verticalScrollBar().value()
+                - event.angleDelta().y()
+            )
+            return True
+        return super().eventFilter(obj, event)
+
+
 class NetworkButton(QPushButton):
     """Card button with brand-coloured FA icon and hover effect."""
 
@@ -233,6 +254,9 @@ class SocialExitWindow(QMainWindow):
         self.setFixedWidth(380)
         self.setMinimumHeight(660)
 
+        # ── Window icon (replaces default exe icon) ─────────────────
+        self.setWindowIcon(qta.icon("mdi6.exit-run", color=C["accent"]))
+
         cw = QWidget()
         self.setCentralWidget(cw)
         root = QVBoxLayout(cw)
@@ -300,25 +324,28 @@ class SocialExitWindow(QMainWindow):
         wl.addWidget(sep)
 
         # ── scrollable list ─────────────────────────────────────────
-        sa = QScrollArea()
-        sa.setWidgetResizable(True)
-        sa.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        sa = SmoothScrollArea()
         sa.setStyleSheet(f"""
             QScrollArea {{ border:none; background:transparent; }}
             QScrollBar:vertical {{
-                width:5px; background:{C['bg']}; border-radius:2px;
+                width:6px; background:{C['bg']}; border-radius:3px;
             }}
             QScrollBar::handle:vertical {{
-                background:{C['separator']}; border-radius:2px; min-height:30px;
+                background:{C['accent']}; border-radius:3px; min-height:40px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background:{C['accent_glow']};
             }}
             QScrollBar::add-line:vertical,
             QScrollBar::sub-line:vertical {{ height:0; }}
+            QScrollBar::add-page:vertical,
+            QScrollBar::sub-page:vertical {{ background:none; }}
         """)
 
         lw = QWidget()
         lw.setStyleSheet("background:transparent;")
         self.bl = QVBoxLayout(lw)
-        self.bl.setContentsMargins(0, 0, 0, 0)
+        self.bl.setContentsMargins(0, 0, 4, 0)
         self.bl.setSpacing(6)
 
         for qta_name, color, name, url in NETWORKS:
@@ -334,6 +361,9 @@ class SocialExitWindow(QMainWindow):
                     oe(ev)
                 return fn
             btn.enterEvent = mk(btn, orig_enter)
+
+            # Let scroll area handle wheel events from this button
+            btn.installEventFilter(sa)
 
             self.btns.append(btn)
             self.bl.addWidget(btn)
